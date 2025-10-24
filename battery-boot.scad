@@ -55,10 +55,10 @@ boot_taper_len_y = 18;
 wall_thickness = 2;
 
 // Rounding to apply to top edges.
-edge_rounding = 4;
+chamfer_size = 4;
 
 // Zip tie size 
-zip_tie_size = 4;
+zip_tie_size = 5;
 
 // *** "Private" variables ***
 /* [Hidden] */
@@ -78,14 +78,14 @@ module boot_main_body(cutout = false) {
   size_adj = cutout ? wall_thickness * 2 : 0;
 
   cuboid(
-    [boot_width_x - size_adj, boot_length_y - size_adj, boot_height_z], rounding=edge_rounding,
+    [boot_width_x - size_adj, boot_length_y - size_adj, boot_height_z], chamfer=chamfer_size,
     edges=[TOP + FRONT, TOP + RIGHT, TOP + BACK, FRONT + RIGHT, RIGHT + BACK]
   ) {
 
     position(LEFT) rotate([0, -90, 0])
         prismoid(
           size1=[boot_height_z, boot_length_y - size_adj], size2=[boot_height_z, cable_chase_width_y - size_adj], h=boot_taper_len_y,
-          rounding=[edge_rounding, 0, 0, edge_rounding]
+          chamfer=[chamfer_size, 0, 0, chamfer_size]
         );
   }
   // cuboid
@@ -101,7 +101,7 @@ module wire_chase(cutout = false) {
   size_adj = cutout ? wall_thickness * 2 : 0;
 
   cuboid(
-    size=[cable_chase_length_x + size_adj * 2, cable_chase_width_y - size_adj, boot_height_z], rounding=edge_rounding,
+    size=[cable_chase_length_x + size_adj * 2, cable_chase_width_y - size_adj, boot_height_z], chamfer=chamfer_size,
     edges=[TOP + FRONT, TOP + BACK]
   );
 }
@@ -110,7 +110,18 @@ module wire_chase(cutout = false) {
 // Zip tie channel on each side of the wire chase.
 //
 module zip_tie_cutout() {
-  cuboid(size=[zip_tie_size, wall_thickness, boot_height_z]);
+
+  // Zip tie cutouts on each side of the wire chase.
+  translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), (cable_chase_width_y / 2), 0])
+    cuboid(size=[zip_tie_size, wall_thickness, boot_height_z]);
+
+  translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), -(cable_chase_width_y / 2), 0])
+    cuboid(size=[zip_tie_size, wall_thickness, boot_height_z]);
+
+  // notch at the bottom for the zip tie to sit in.
+  translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), 0, -(boot_height_z / 2)])
+    cuboid(size=[zip_tie_size, cable_chase_width_y, zip_tie_size]);
+
 }
 
 //
@@ -132,13 +143,9 @@ module build_model() {
     translate([-(cable_chase_length_x + boot_taper_len_y + wall_thickness * 2), 0, -wall_thickness])
       wire_chase(cutout=true);
 
-    // Zip tie cutouts on each side of the wire chase.
-    translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), (cable_chase_width_y / 2), 0])
-      zip_tie_cutout();
-
-    translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), -(cable_chase_width_y / 2), 0])
-      zip_tie_cutout();
-
+    zip_tie_cutout();
   }
+
+
 }
 build_model();
