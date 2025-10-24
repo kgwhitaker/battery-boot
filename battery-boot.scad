@@ -46,13 +46,15 @@ boot_height_z = 24;
 cable_chase_width_y = 19;
 
 // Length of the chase once it is tapered down to cable width. 
-cable_chase_length_x = 10;
+cable_chase_length_x = 20;
 
 // Distance from the battery terminal box to the point of cable chase.
 boot_taper_len_y = 18;
 
 // Thickness of all walls
 wall_thickness = 2;
+
+edge_rounding = 4;
 
 // *** "Private" variables ***
 /* [Hidden] */
@@ -61,47 +63,63 @@ wall_thickness = 2;
 $fa = 1;
 $fs = 0.4;
 
-
 //
 // The main part of the boot that covers the battery terminal post
 // and the battery clamp.
 //
 // If this is a cutout, then shrink the X and Y dimensions by 2x wall thickness.
 //
-module boot_main_body(cutout = false)
-{
-  edge_rounding = 4;
+module boot_main_body(cutout = false) {
 
   size_adj = cutout ? wall_thickness * 2 : 0;
 
-  cuboid([boot_width_x - size_adj, boot_length_y -size_adj,boot_height_z], rounding = edge_rounding, 
-    edges=[TOP+FRONT,TOP+RIGHT,TOP+BACK,FRONT+RIGHT, RIGHT+BACK]) {
+  cuboid(
+    [boot_width_x - size_adj, boot_length_y - size_adj, boot_height_z], rounding=edge_rounding,
+    edges=[TOP + FRONT, TOP + RIGHT, TOP + BACK, FRONT + RIGHT, RIGHT + BACK]
+  ) {
 
-      position(LEFT) rotate([0,-90,0]) 
-        prismoid(size1=[boot_height_z, boot_length_y - size_adj], size2=[boot_height_z,cable_chase_width_y - size_adj], h=boot_taper_len_y, 
-          rounding = [edge_rounding,0,0,edge_rounding]);
-    } // cuboid
+    position(LEFT) rotate([0, -90, 0])
+        prismoid(
+          size1=[boot_height_z, boot_length_y - size_adj], size2=[boot_height_z, cable_chase_width_y - size_adj], h=boot_taper_len_y,
+          rounding=[edge_rounding, 0, 0, edge_rounding]
+        );
+  }
+  // cuboid
 }
 
 //
-// Wire Chase
+// Creates the wire chase where the cable exits the main body.
 //
+// If this is a cutout, then shrink the y dimension.  x dimension covers the the chase + main body.
+//
+module wire_chase(cutout = false) {
 
+  size_adj = cutout ? wall_thickness * 2 : 0;
 
-
+  cuboid(
+    size=[cable_chase_length_x + size_adj * 2, cable_chase_width_y - size_adj, boot_height_z], rounding=edge_rounding,
+    edges=[TOP + FRONT, TOP + BACK]
+  );
+}
 
 //
 // Builds the model.
 //
 module build_model() {
-  difference() {
-    boot_main_body(cutout=false);
 
-    translate([0,0,-wall_thickness])
+  difference() {
+    union() {
+      boot_main_body(cutout=false);
+
+      translate([-(boot_width_x + (cable_chase_length_x / 2) + wall_thickness), 0, 0])
+        wire_chase(cutout=false);
+    }
+
+    translate([0, 0, -wall_thickness])
       boot_main_body(cutout=true);
 
-
+    translate([-(cable_chase_length_x + boot_taper_len_y + wall_thickness * 2), 0, -wall_thickness])
+      wire_chase(cutout=true);
   }
-
 }
 build_model();
