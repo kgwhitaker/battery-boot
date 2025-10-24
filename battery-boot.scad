@@ -54,7 +54,11 @@ boot_taper_len_y = 18;
 // Thickness of all walls
 wall_thickness = 2;
 
+// Rounding to apply to top edges.
 edge_rounding = 4;
+
+// Zip tie size 
+zip_tie_size = 4;
 
 // *** "Private" variables ***
 /* [Hidden] */
@@ -103,6 +107,13 @@ module wire_chase(cutout = false) {
 }
 
 //
+// Zip tie channel on each side of the wire chase.
+//
+module zip_tie_cutout() {
+  cuboid(size=[zip_tie_size, wall_thickness, boot_height_z]);
+}
+
+//
 // Builds the model.
 //
 module build_model() {
@@ -120,6 +131,14 @@ module build_model() {
 
     translate([-(cable_chase_length_x + boot_taper_len_y + wall_thickness * 2), 0, -wall_thickness])
       wire_chase(cutout=true);
+
+    // Zip tie cutouts on each side of the wire chase.
+    translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), (cable_chase_width_y / 2), 0])
+      zip_tie_cutout();
+
+    translate([-(wall_thickness + boot_width_x + cable_chase_length_x / 2), -(cable_chase_width_y / 2), 0])
+      zip_tie_cutout();
+
   }
 }
 build_model();
