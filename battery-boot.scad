@@ -66,27 +66,26 @@ $fs = 0.4;
 // The main part of the boot that covers the battery terminal post
 // and the battery clamp.
 //
+// If this is a cutout, then shrink the X and Y dimensions by 2x wall thickness.
+//
 module boot_main_body(cutout = false)
 {
   edge_rounding = 4;
 
-  cuboid([boot_width_x, boot_length_y,boot_height_z], rounding = edge_rounding, 
+  size_adj = cutout ? wall_thickness * 2 : 0;
+
+  cuboid([boot_width_x - size_adj, boot_length_y -size_adj,boot_height_z], rounding = edge_rounding, 
     edges=[TOP+FRONT,TOP+RIGHT,TOP+BACK,FRONT+RIGHT, RIGHT+BACK]) {
 
       position(LEFT) rotate([0,-90,0]) 
-        prismoid(size1=[boot_height_z, boot_length_y], size2=[boot_height_z,cable_chase_width_y], h=boot_taper_len_y, 
+        prismoid(size1=[boot_height_z, boot_length_y - size_adj], size2=[boot_height_z,cable_chase_width_y - size_adj], h=boot_taper_len_y, 
           rounding = [edge_rounding,0,0,edge_rounding]);
-
-
-
-    }
-
-
-
-
-
-
+    } // cuboid
 }
+
+//
+// Wire Chase
+//
 
 
 
@@ -95,7 +94,14 @@ module boot_main_body(cutout = false)
 // Builds the model.
 //
 module build_model() {
-  boot_main_body();
+  difference() {
+    boot_main_body(cutout=false);
+
+    translate([0,0,-wall_thickness])
+      boot_main_body(cutout=true);
+
+
+  }
 
 }
 build_model();
