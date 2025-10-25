@@ -54,7 +54,7 @@ boot_taper_len_y = 18;
 // Thickness of all walls
 wall_thickness = 2;
 
-// Rounding to apply to top edges.
+// Chamfer applied to top edges.
 chamfer_size = 4;
 
 // Zip tie size 
