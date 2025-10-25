@@ -1,6 +1,4 @@
-# Car Battery
-
-Car Battery Terminal Boot Covers
+# Car Battery Terminal Boot Covers
 
 A cover for car battery terminals to help protect against accidental short circuit.
 
