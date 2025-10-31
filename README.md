@@ -20,7 +20,7 @@ This model is parameter driven and can be customized to meet your specific needs
 
 All values are in millimeters.
 
-## Dependencies and Using the Component
+## Dependencies and Customization
 
 This model is built using the tools listed below and must be installed in order to customize the model.
 
